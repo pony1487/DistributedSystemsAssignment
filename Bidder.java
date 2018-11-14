@@ -50,10 +50,10 @@ public class Bidder extends User
             //Get whats on offer straight away from server
             //response = input.nextLine();
             //response = input.nextLine();
-            response = input.readLine();
+            //response = input.readLine();
 
-            System.out.println("\nSERVER> Item for bidding: " + response + "\n");
-            System.out.println("\nMenu: 1)Bid 2)Current Max Bid");
+            //System.out.println("\nSERVER> Item for bidding: " + response + "\n");
+            //System.out.println("\nMenu: 1)Bid 2)Current Max Bid");
 
 
             do
