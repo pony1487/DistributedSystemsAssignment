@@ -104,7 +104,10 @@ public class ClientHandler extends Thread
             auction.bids.add(bid);
             auction.item.bidOnItem(bidFloat);
 
-            output.println(auction.item.toString());
+            //output.println(auction.item.toString());
+            this.auction.notifyClientsOfMaxBid();
+
+
 
         }
     }
@@ -121,6 +124,6 @@ public class ClientHandler extends Thread
     }
 
     public void displayCurrentMaxBid(){
-        output.println(auction.item.getMaxBid());
+        output.println("New Max Bid: " + auction.item.getMaxBid());
     }
 }

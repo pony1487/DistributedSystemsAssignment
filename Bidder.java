@@ -6,7 +6,6 @@ public class Bidder extends User
 {
     private static InetAddress host;
     private final int PORT = 1234;
-
     public Bidder(String name)
     {
         super(name);

@@ -12,6 +12,7 @@ public class Auction {
     /*
     One item per auction: Expand it later
      */
+    private ArrayList<ClientHandler> listOfClientHandlers = new ArrayList<ClientHandler>();
     public ArrayList<User> users = new ArrayList<User>();
     public Item item;
     public ArrayList<Bid>  bids = new ArrayList<Bid>();
@@ -60,6 +61,7 @@ public class Auction {
                 //this client and pass the constructor for this
                 //thread a reference to the relevant socket...
                 ClientHandler handler = new ClientHandler(client,this);
+                listOfClientHandlers.add(handler);
 
                 handler.start();//As usual, this method calls run.
 
@@ -69,6 +71,13 @@ public class Auction {
                 System.exit(1);
             }
         }
+    }
+
+    public void notifyClientsOfMaxBid(){
+        for(int i = 0; i < listOfClientHandlers.size();i++){
+            listOfClientHandlers.get(i).displayCurrentMaxBid();
+        }
+        notifyAll();
     }
 
 
