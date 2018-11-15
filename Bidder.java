@@ -34,6 +34,7 @@ public class Bidder implements Runnable
         while (thread != null){
             try {
                 //String message = chatName + " > " + console.readLine();
+                System.out.println("1) Bid ");
                 String message = console.readLine();
                 streamOut.writeUTF(message);
                 streamOut.flush();

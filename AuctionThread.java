@@ -42,7 +42,12 @@ public class AuctionThread extends Thread
         thread = new Thread(this);
         while (true){
             try{
-                server.broadcast(ID, streamIn.readUTF());
+                String inputFromClient = streamIn.readUTF();
+                if(inputFromClient.equals("1")){
+                    server.broadcast(ID, "You entered 1");
+
+                }
+                //server.broadcast(ID, streamIn.readUTF());
 
                 int pause = (int)(Math.random()*3000);
                 Thread.sleep(pause);

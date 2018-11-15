@@ -11,6 +11,9 @@ public class Auction implements Runnable
     private Thread       thread = null;
     private int clientCount = 0;
 
+    //Item to bid on
+    private Item item = new Item("Fender Stratocaster", "1959 Vintage Guitar",100);
+
     public Auction(int port)
     {
         try {
@@ -111,6 +114,7 @@ public class Auction implements Runnable
 
     private void addThread(Socket socket)
     {
+        String welcomeMessage = "Welcome! You have connected to the auction for: " + this.item.toString();
         if (clientCount < clients.length){
 
             System.out.println("Client accepted: " + socket);
@@ -118,6 +122,7 @@ public class Auction implements Runnable
             try{
                 clients[clientCount].open();
                 clients[clientCount].start();
+                clients[clientCount].send(welcomeMessage);
                 clientCount++;
             }
             catch(IOException ioe){
