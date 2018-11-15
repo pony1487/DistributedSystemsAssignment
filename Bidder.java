@@ -49,6 +49,7 @@ public class Bidder extends User
             //Get whats on offer straight away from server
             //response = input.nextLine();
             //response = input.nextLine();
+
             response = input.readLine();
 
             System.out.println("\nSERVER> Item for bidding: " + response + "\n");
@@ -63,6 +64,7 @@ public class Bidder extends User
                 response = input.readLine();	//Step 3.
                 System.out.println("\nMenu: 1)Bid 2)Current Max Bid");
                 System.out.println("\nSERVER> " + response + "\n");
+
             }while (!message.equals("***CLOSE***"));
         }
         catch(IOException ioEx)
@@ -85,6 +87,25 @@ public class Bidder extends User
             }
         }
     }
+
+    public void parseResponseFromServer(String response){
+        //remove curly brackets
+        response = response.substring(1, response.length()-1);
+        //split the string into key value pairs
+        String[] keyValuePairs = response.split(",");
+        Map<String,String> map = new HashMap<>();
+
+        for(String pair : keyValuePairs)
+        {
+            //split the pairs to get key and value
+            String[] entry = pair.split("=");
+
+            //add them to the hashmap and trim whitespaces
+            map.put(entry[0].trim(), entry[1].trim());
+        }
+        System.out.println(map.get("Key1"));
+    }
+
 
     public static void main(String[] args) {
         Bidder bidder = new Bidder("Tom");

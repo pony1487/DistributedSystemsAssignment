@@ -74,6 +74,8 @@ public class Auction {
     }
 
     public void notifyClientsOfMaxBid(){
+        //This works but requires client to press enter to receive a line from the server to get the update
+
         for(int i = 0; i < listOfClientHandlers.size();i++){
             listOfClientHandlers.get(i).displayCurrentMaxBid();
         }

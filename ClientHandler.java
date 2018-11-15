@@ -3,6 +3,7 @@ import java.net.*;
 import java.util.*;
 
 
+
 public class ClientHandler extends Thread
 {
     private Socket client;
@@ -61,6 +62,7 @@ public class ClientHandler extends Thread
                 displayItem();
             }
 
+
             //Echo message back to client on
             //the socket's output stream...
             //output.println("ECHO: " + received);
@@ -105,6 +107,7 @@ public class ClientHandler extends Thread
             auction.item.bidOnItem(bidFloat);
 
             //output.println(auction.item.toString());
+            //This works but requires client to press enter to receive a line from the server to get the update
             this.auction.notifyClientsOfMaxBid();
 
 
@@ -123,7 +126,18 @@ public class ClientHandler extends Thread
         }
     }
 
+    public void createResponse(String user, String bidAmount){
+        Map<String, String> returnResponse = new HashMap<>();
+
+        returnResponse.put("User",user);
+        returnResponse.put("Bid",bidAmount);
+
+        output.println(returnResponse);
+
+    }
+
     public void displayCurrentMaxBid(){
+
         output.println("New Max Bid: " + auction.item.getMaxBid());
     }
 }
