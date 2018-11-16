@@ -8,14 +8,14 @@ public class Bidder implements Runnable
     private BufferedReader  console   = null;
     private DataOutputStream streamOut = null;
     private BidderThread client    = null;
-    private String chatName;
+    private String userName;
 
 
     public Bidder(String serverName, int serverPort, String name)
     {
         System.out.println("Establishing connection. Please wait ...");
 
-        this.chatName = name;
+        this.userName = name;
         try{
             socket = new Socket(serverName, serverPort);
             System.out.println("Connected: " + socket);
@@ -34,6 +34,7 @@ public class Bidder implements Runnable
     {
         while (thread != null){
             try {
+
                 System.out.print(">: ");
                 String message = console.readLine();
                 streamOut.writeUTF(message);

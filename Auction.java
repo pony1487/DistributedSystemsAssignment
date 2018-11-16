@@ -1,5 +1,6 @@
 import java.net.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,6 +16,8 @@ public class Auction implements Runnable {
 
     private boolean auctionIsRunning = false;
     private boolean timeRemainingHasBeenBroadcast = false;
+
+    private ArrayList<Bid> listOfBids = new ArrayList<Bid>();
 
 
 
@@ -161,7 +164,7 @@ public class Auction implements Runnable {
                 System.out.println(timeRemaining);
                 if (timeRemaining == 0) {
                     auctionIsRunning = false;
-
+                    timer.cancel();
                     endAuctionAndDetermineWinner();
                 }
 
@@ -186,9 +189,31 @@ public class Auction implements Runnable {
         timeRemainingHasBeenBroadcast = false;
     }
 
-    public void endAuctionAndDetermineWinner(){
+    public void addBidToBidList(int bidder, Float amount){
+        Bid b = new Bid(this.item, bidder, amount);
+        listOfBids.add(b);
+    }
+
+
+    public synchronized void endAuctionAndDetermineWinner(){
+        double maxValue = -1;
+        int indexOfMaxValue = -1;
+        for(int i = 0; i < listOfBids.size(); i++) {
+            if(listOfBids.get(i).getBidAmount() > maxValue) {
+                indexOfMaxValue = i;
+            }
+        }
+        int portOfWinner = listOfBids.get(indexOfMaxValue).getBiddersSocketPort();
+        //print on the server
+        System.out.println(portOfWinner + " has won!");
+
+        for (int i = 0; i < clientCount; i++) {
+            clients[i].send("Auction Over! " + portOfWinner + " has won the item!");
+        }
+        notifyAll();
 
     }
+
 
     public static void main(String args[]) {
         Auction server = null;
