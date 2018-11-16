@@ -38,7 +38,7 @@ public class BidderThread extends Thread
     {
         while (true && client!= null){
             try {
-
+                System.out.print(">:");
                 client.handle(streamIn.readUTF());
             }
             catch(IOException ioe)

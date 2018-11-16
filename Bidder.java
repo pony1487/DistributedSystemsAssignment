@@ -29,12 +29,12 @@ public class Bidder implements Runnable
         }
     }
 
+
     public void run()
     {
         while (thread != null){
             try {
-                //String message = chatName + " > " + console.readLine();
-                System.out.println("1) Bid ");
+                System.out.print(">: ");
                 String message = console.readLine();
                 streamOut.writeUTF(message);
                 streamOut.flush();
@@ -85,7 +85,8 @@ public class Bidder implements Runnable
 
 
     public static void main(String args[])
-    {  Bidder client = null;
+    {
+        Bidder client = null;
         if (args.length != 3)
             System.out.println("Usage: java Bidder host port name");
         else

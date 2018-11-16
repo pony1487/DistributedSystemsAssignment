@@ -1,5 +1,8 @@
 import java.net.*;
 import java.io.*;
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 
 public class Auction implements Runnable
@@ -9,19 +12,30 @@ public class Auction implements Runnable
     private AuctionThread clients[] = new AuctionThread[50];
     private ServerSocket server = null;
     private Thread       thread = null;
+    private Timer timer;
+    private int timeRemaining = 60;
+
+
     private int clientCount = 0;
 
     //Item to bid on
-    private Item item = new Item("Fender Stratocaster", "1959 Vintage Guitar",100);
+    public Item item = new Item("Fender Stratocaster", "1959 Vintage Guitar",100);
+
 
     public Auction(int port)
     {
+        timer = new Timer();
+        runTimerTask();
+
         try {
 
             System.out.println("Binding to port " + port + ", please wait  ...");
             server = new ServerSocket(port);
             System.out.println("Server started: " + server.getInetAddress());
             start();
+
+
+
         }
         catch(IOException ioe)
         {
@@ -30,8 +44,10 @@ public class Auction implements Runnable
         }
     }
 
+
     public void run()
     {
+
         while (thread != null)
         {
             try{
@@ -39,17 +55,23 @@ public class Auction implements Runnable
                 System.out.println("Waiting for a client ...");
                 addThread(server.accept());
 
-                int pause = (int)(Math.random()*3000);
-                Thread.sleep(pause);
+
+
+
+
+                //int pause = (int)(Math.random()*3000);
+                //Thread.sleep(pause);
 
             }
             catch(IOException ioe){
                 System.out.println("Server accept error: " + ioe);
                 stop();
             }
+            /*
             catch (InterruptedException e){
                 System.out.println(e);
             }
+            */
         }
     }
 
@@ -87,6 +109,7 @@ public class Auction implements Runnable
             }
         notifyAll();
     }
+
     public synchronized void remove(int ID)
     {
         int pos = findClient(ID);
@@ -114,7 +137,7 @@ public class Auction implements Runnable
 
     private void addThread(Socket socket)
     {
-        String welcomeMessage = "Welcome! You have connected to the auction for: " + this.item.toString();
+        String welcomeMessage = "Welcome! You have connected to the auction for: " + this.item.toString() +"\nEnter a bid..\n";
         if (clientCount < clients.length){
 
             System.out.println("Client accepted: " + socket);
@@ -131,6 +154,21 @@ public class Auction implements Runnable
         }
         else
             System.out.println("Client refused: maximum " + clients.length + " reached.");
+    }
+
+    public void runTimerTask(){
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                timeRemaining--;
+                System.out.println(timeRemaining);
+            }
+        },0,1000);
+    }
+
+    public int getTimeRemaining(){
+        return timeRemaining;
     }
 
 

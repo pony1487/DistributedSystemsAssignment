@@ -11,6 +11,7 @@ public class AuctionThread extends Thread
     private DataOutputStream streamOut = null;
     private Thread thread;
 
+
     public AuctionThread(Auction _server, Socket _socket)
     {
         super();
@@ -41,21 +42,39 @@ public class AuctionThread extends Thread
         System.out.println("Server Thread " + ID + " running.");
         thread = new Thread(this);
         while (true){
+
             try{
+
                 String inputFromClient = streamIn.readUTF();
-                if(inputFromClient.equals("1")){
-                    server.broadcast(ID, "You entered 1");
 
+                //Check if user entered a float
+                try{
+                    Float inputAsFloat = Float.parseFloat(inputFromClient);
+
+                    if(inputAsFloat < server.item.getMaxBid()){
+                        send("Invalid Bid: Bid Lower than current bid");
+                    }
+                    else {
+                        addBid(inputAsFloat);
+                        send("You bid: $" + inputAsFloat);
+                        server.broadcast(ID, "Current Max: $" + server.item.getMaxBid());
+                        server.broadcast(ID, "Time Remaining: " + server.getTimeRemaining());
+
+                    }
+                }catch(NumberFormatException e){
+                    send("Error: Bid must be a float!");
                 }
-                //server.broadcast(ID, streamIn.readUTF());
 
-                int pause = (int)(Math.random()*3000);
-                Thread.sleep(pause);
+                //NOTE: Find out what this is doing and why?
+                //int pause = (int)(Math.random()*3000);
+                //Thread.sleep(pause);
             }
+            /*
             catch (InterruptedException e)
             {
                 System.out.println(e);
             }
+            */
             catch(IOException ioe){
                 //System.out.println(ID + " ERROR reading: " + ioe.getMessage());
                 server.remove(ID);
@@ -83,4 +102,19 @@ public class AuctionThread extends Thread
         if (streamOut != null)
             streamOut.close();
     }
+
+
+    public void addBid(Float amount){
+
+        if(amount < server.item.getMaxBid()){
+            try {
+                streamOut.writeUTF("Invalid: Bid lower than current bid");
+            }catch (Exception e){
+                System.out.println(e);
+            }
+        }else {
+            server.item.bidOnItem(amount);
+        }
+    }
+
 }
