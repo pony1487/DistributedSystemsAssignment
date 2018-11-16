@@ -43,6 +43,7 @@ public class AuctionThread extends Thread
         thread = new Thread(this);
         while (true){
 
+
             try{
 
                 String inputFromClient = streamIn.readUTF();
@@ -58,8 +59,10 @@ public class AuctionThread extends Thread
                         addBid(inputAsFloat);
                         send("You bid: $" + inputAsFloat);
                         server.broadcast(ID, "Current Max: $" + server.item.getMaxBid());
-                        server.broadcast(ID, "Time Remaining: " + server.getTimeRemaining());
-
+                        //reset time here
+                        server.resetTimeRemaining();
+                        //reset flag so after another round of bidding they will get a time warning
+                        server.setTimeRemainingHasBeenBroadcastToFalse();
                     }
                 }catch(NumberFormatException e){
                     send("Error: Bid must be a float!");
