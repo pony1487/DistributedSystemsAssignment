@@ -9,6 +9,7 @@ public class AuctionThread extends Thread {
     private DataInputStream streamIn = null;
     private DataOutputStream streamOut = null;
     private Thread thread;
+    private int indexOfItemBeingBidOn;
 
 
     public AuctionThread(Auction _server, Socket _socket) {
@@ -16,6 +17,7 @@ public class AuctionThread extends Thread {
         server = _server;
         socket = _socket;
         ID = socket.getPort();
+        indexOfItemBeingBidOn = server.currentItemIndex;
 
     }
 
@@ -35,6 +37,7 @@ public class AuctionThread extends Thread {
     }
 
     public void run() {
+
         System.out.println("Server Thread " + ID + " running.");
         thread = new Thread(this);
         while (true) {
@@ -49,12 +52,14 @@ public class AuctionThread extends Thread {
                 try {
                     Float inputAsFloat = Float.parseFloat(inputFromClient);
 
-                    if (inputAsFloat < server.item.getMaxBid()) {
+                    System.out.println("Current item index:" + indexOfItemBeingBidOn);
+
+                    if (inputAsFloat < server.listOfItems.get(indexOfItemBeingBidOn).getMaxBid()) {
                         send("Invalid Bid: Bid Lower than current bid");
                     } else {
                         addBid(inputAsFloat);
                         send("You bid: $" + inputAsFloat);
-                        server.broadcast(ID, "Current Max: $" + server.item.getMaxBid());
+                        server.broadcast(ID, "Current Max: $" + server.listOfItems.get(indexOfItemBeingBidOn).getMaxBid());
 
                         //reset timer
                         server.resetTimeRemaining();
@@ -98,14 +103,14 @@ public class AuctionThread extends Thread {
 
     public void addBid(Float amount) {
 
-        if (amount < server.item.getMaxBid()) {
+        if (amount < server.listOfItems.get(indexOfItemBeingBidOn).getMaxBid()) {
             try {
                 streamOut.writeUTF("Invalid: Bid lower than current bid");
             } catch (Exception e) {
                 System.out.println(e);
             }
         } else {
-            server.item.bidOnItem(amount);
+            server.listOfItems.get(indexOfItemBeingBidOn).bidOnItem(amount);
         }
     }
 
