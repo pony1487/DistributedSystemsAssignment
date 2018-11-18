@@ -23,7 +23,7 @@ public class Auction implements Runnable {
 
     private int clientCount = 0;
 
-    //Item to bid on
+    //Item to bid on(only one currently)
     public Item item = new Item("Fender Stratocaster", "1959 Vintage Guitar", 100);
 
 

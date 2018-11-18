@@ -4,7 +4,7 @@ public class Item {
     private String description;
     private float price;
     private float currentMaxBid;
-    private boolean ready = false;
+    private boolean ready = false; // Used for different thread lock functions
 
     public Item(String name, String description, float price) {
         this.name = name;
