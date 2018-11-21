@@ -205,12 +205,14 @@ public class Auction implements Runnable {
 
     public void resetTimeRemaining() {
         timeRemaining = 60;
+
     }
 
     public void setTimeRemainingHasBeenBroadcastToFalse() {
         //Used to reset the time warning message so it will fire again if another bid has been placed
         timeRemainingHasBeenBroadcast = false;
     }
+
 
     public void addBidToBidList(int bidder, Float amount) {
         Bid b = new Bid(listOfItems.get(currentItemIndex), bidder, amount);
@@ -230,7 +232,6 @@ public class Auction implements Runnable {
 
         //restart time for next item
         resetTimeRemaining();
-
         //run timer for next auction
         runTimerTask();
 
