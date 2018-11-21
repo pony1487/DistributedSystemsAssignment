@@ -25,7 +25,7 @@ public class Item {
         return price;
     }
 
-    /*
+
     //One way
     public synchronized void bidOnItem(float bidAmount) {
         //Figure this out..wait() locks this until its notified
@@ -35,8 +35,8 @@ public class Item {
         while (System.currentTimeMillis() - t1 < 5000);
         this.currentMaxBid = bidAmount;
     }
-    */
 
+    /*
     //Another way
     public void bidOnItem(float bidAmount) {
         //Figure this out..wait() locks this until its notified
@@ -48,7 +48,7 @@ public class Item {
             this.currentMaxBid = bidAmount;
         }
     }
-
+    */
 
     // Yet Another way(not quite working yet, It resists the items bid to the price
     /*

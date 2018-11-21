@@ -42,17 +42,19 @@ public class AuctionThread extends Thread {
         thread = new Thread(this);
         while (true) {
 
-
             try {
 
                 String inputFromClient = streamIn.readUTF();
+
+                //get the current item index being bid on
+                indexOfItemBeingBidOn = server.currentItemIndex;
 
 
                 //Check if user entered a float
                 try {
                     Float inputAsFloat = Float.parseFloat(inputFromClient);
 
-                    System.out.println("Current item index:" + indexOfItemBeingBidOn);
+                    System.out.println("Current item index in AuctionThread:" + indexOfItemBeingBidOn);
 
                     if (inputAsFloat < server.listOfItems.get(indexOfItemBeingBidOn).getMaxBid()) {
                         send("Invalid Bid: Bid Lower than current bid");

@@ -11,7 +11,7 @@ public class Auction implements Runnable {
     private AuctionThread clients[] = new AuctionThread[50];
     private ServerSocket server = null;
     private Thread thread = null;
-    private Timer timer;
+    public Timer timer;
     private int timeRemaining = 60;
 
     private boolean auctionIsRunning = false;
@@ -29,12 +29,11 @@ public class Auction implements Runnable {
     public int currentItemIndex = 0;
 
 
-
     public Auction(int port) {
 
         initItemList();
         auctionIsRunning = true;
-        timer = new Timer();
+        //timer = new Timer();
         runTimerTask();
 
 
@@ -52,7 +51,7 @@ public class Auction implements Runnable {
         }
     }
 
-    public void initItemList(){
+    public void initItemList() {
         Item item1 = new Item("Fender Stratocaster", "1959 Vintage Guitar", 1000);
         Item item2 = new Item("Sony Ps4", "Games Console", 400);
         Item item3 = new Item("Porsche", "Car", 1000);
@@ -64,7 +63,6 @@ public class Auction implements Runnable {
         listOfItems.add(item3);
         listOfItems.add(item4);
         listOfItems.add(item5);
-
 
 
     }
@@ -170,9 +168,10 @@ public class Auction implements Runnable {
             System.out.println("Client refused: maximum " + clients.length + " reached.");
     }
 
-    public void sendItemDetailsToClients(){
+    public void sendItemDetailsToClients() {
+
         String itemDetails = "Next item: " + listOfItems.get(currentItemIndex) + "\nEnter a bid..\n";
-        for(int i = 0; i < clients.length;i++){
+        for (int i = 0; i < clientCount; i++) {
             clients[i].send(itemDetails);
         }
 
@@ -180,15 +179,15 @@ public class Auction implements Runnable {
 
     //Controls the running of the auction
     public void runTimerTask() {
-
+        timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 timeRemaining--;
                 System.out.println(timeRemaining);
-                if (timeRemaining == 0) {
+                if (timeRemaining <= 0) {
                     auctionIsRunning = false;
-                    timer.cancel();
+                    //timer.cancel();
                     endAuctionAndDetermineWinner();
                 }
 
@@ -208,55 +207,26 @@ public class Auction implements Runnable {
         timeRemaining = 60;
     }
 
-    public void setTimeRemainingHasBeenBroadcastToFalse(){
+    public void setTimeRemainingHasBeenBroadcastToFalse() {
         //Used to reset the time warning message so it will fire again if another bid has been placed
         timeRemainingHasBeenBroadcast = false;
     }
 
-    public void addBidToBidList(int bidder, Float amount){
+    public void addBidToBidList(int bidder, Float amount) {
         Bid b = new Bid(listOfItems.get(currentItemIndex), bidder, amount);
         listOfBids.add(b);
     }
 
 
+    public synchronized void endAuctionAndDetermineWinner() {
 
-
-    public synchronized void endAuctionAndDetermineWinner(){
-
-        currentItemIndex++;
-
-        //check if there are no more items to bid on.
-        if(currentItemIndex == 5){
-            for (int i = 0; i < clientCount; i++) {
-                clients[i].send("No more items left! Thank you, bye");
-            }
-            notifyAll();
-            System.exit(0);
-
-        }
-
+        //For finding maximum in bid list and determine winner
+        int portOfWinner = 0;
         double maxValue = -1;
         int indexOfMaxValue = -1;
-        for(int i = 0; i < listOfBids.size(); i++) {
-            if(listOfBids.get(i).getBidAmount() > maxValue) {
-                indexOfMaxValue = i;
-            }
-        }
-        int portOfWinner = listOfBids.get(indexOfMaxValue).getBiddersSocketPort();
-        //print on the server
-        System.out.println(portOfWinner + " has won!");
+        String winnerMessage;
 
-        //empty the bid list for the next auction
-        listOfBids.clear();
-
-        for (int i = 0; i < clientCount; i++) {
-            clients[i].send("Auction Over! " + portOfWinner + " has won the item!");
-        }
-        notifyAll();
-
-        //display next item
-        sendItemDetailsToClients();
-
+        setTimeRemainingHasBeenBroadcastToFalse();
 
         //restart time for next item
         resetTimeRemaining();
@@ -264,6 +234,49 @@ public class Auction implements Runnable {
         //run timer for next auction
         runTimerTask();
 
+
+        //check if there are no more items to bid on.
+        if (currentItemIndex == 5) {
+            for (int i = 0; i < clientCount; i++) {
+                clients[i].send("No more items left! Thank you, bye");
+            }
+            notifyAll();
+            timer.cancel();
+            System.exit(0);
+
+        }
+
+        //empty the bid list for the next auction if there has been a bid
+        if (listOfBids.size() != 0) {
+
+            for (int i = 0; i < listOfBids.size(); i++) {
+                if (listOfBids.get(i).getBidAmount() > maxValue) {
+                    indexOfMaxValue = i;
+                }
+            }
+            portOfWinner = listOfBids.get(indexOfMaxValue).getBiddersSocketPort();
+            //print on the server
+            System.out.println(portOfWinner + " has won!");
+
+            listOfBids.clear();
+        }
+
+        if (portOfWinner == 0) {
+            winnerMessage = "No winner!!";
+        } else {
+            winnerMessage = "Auction Over! " + portOfWinner + " has won the item!";
+        }
+
+        for (int i = 0; i < clientCount; i++) {
+            clients[i].send(winnerMessage);
+        }
+        notifyAll();
+
+
+        currentItemIndex++;
+        System.out.println("Current item index in Auction:" + currentItemIndex);
+        //display next item
+        sendItemDetailsToClients();
     }
 
 
