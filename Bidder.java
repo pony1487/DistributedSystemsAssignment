@@ -1,115 +1,88 @@
-import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.io.*;
 
-public class Bidder extends User
-{
-    private static InetAddress host;
-    private final int PORT = 1234;
-    public Bidder(String name)
-    {
-        super(name);
 
-        try
-        {
-            host = InetAddress.getLocalHost();
+public class Bidder implements Runnable {
+    private Socket socket = null;
+    private Thread thread = null;
+    private BufferedReader console = null;
+    private DataOutputStream streamOut = null;
+    private BidderThread client = null;
+    private String userName;
+
+
+    public Bidder(String serverName, int serverPort, String name) {
+        System.out.println("Establishing connection. Please wait ...");
+
+        this.userName = name;
+        try {
+            socket = new Socket(serverName, serverPort);
+            System.out.println("Connected: " + socket);
+            start();
+        } catch (UnknownHostException uhe) {
+            System.out.println("Host unknown: " + uhe.getMessage());
+        } catch (IOException ioe) {
+            System.out.println("Unexpected exception: " + ioe.getMessage());
         }
-        catch(UnknownHostException uhEx)
-        {
-            System.out.println("Host ID not found!");
-            System.exit(1);
-        }
-        accessServer();
     }
 
-    private void accessServer()
-    {
-        Socket link = null;						//Step 1.
 
-        try
-        {
-            link = new Socket(host,PORT);		//Step 1.
-            /*
-            Scanner input = new Scanner(
-                    link.getInputStream());//Step 2.
-               */
-            PrintWriter output =
-                    new PrintWriter(
-                            link.getOutputStream(),true);//Step 2.
+    public void run() {
+        while (thread != null) {
+            try {
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(link.getInputStream()));
-
-            //Set up stream for keyboard entry...
-            Scanner userEntry = new Scanner(System.in);
-
-
-
-            String message, response;
-
-            //Get whats on offer straight away from server
-            //response = input.nextLine();
-            //response = input.nextLine();
-
-            response = input.readLine();
-
-            System.out.println("\nSERVER> Item for bidding: " + response + "\n");
-            System.out.println("\nMenu: 1)Bid 2)Current Max Bid");
-
-
-            do
-            {
                 System.out.print(">: ");
-                message =  userEntry.nextLine();
-                output.println(message); 		//Step 3.
-                response = input.readLine();	//Step 3.
-                System.out.println("\nMenu: 1)Bid 2)Current Max Bid");
-                System.out.println("\nSERVER> " + response + "\n");
-
-            }while (!message.equals("***CLOSE***"));
-        }
-        catch(IOException ioEx)
-        {
-            ioEx.printStackTrace();
-        }
-
-        finally
-        {
-            try
-            {
-                System.out.println(
-                        "\n* Closing connection... *");
-                link.close();					//Step 4.
-            }
-            catch(IOException ioEx)
-            {
-                System.out.println("Unable to disconnect!");
-                System.exit(1);
+                String message = console.readLine();
+                streamOut.writeUTF(message);
+                streamOut.flush();
+            } catch (IOException ioe) {
+                System.out.println("Sending error: " + ioe.getMessage());
+                stop();
             }
         }
     }
 
-    public void parseResponseFromServer(String response){
-        //remove curly brackets
-        response = response.substring(1, response.length()-1);
-        //split the string into key value pairs
-        String[] keyValuePairs = response.split(",");
-        Map<String,String> map = new HashMap<>();
+    public void handle(String msg) {
+        if (msg.equals(".bye")) {
+            System.out.println("Good bye. Press RETURN to exit ...");
+            stop();
+        } else
+            System.out.println(msg);
+    }
 
-        for(String pair : keyValuePairs)
-        {
-            //split the pairs to get key and value
-            String[] entry = pair.split("=");
+    public void start() throws IOException {
+        console = new BufferedReader(new InputStreamReader(System.in));
 
-            //add them to the hashmap and trim whitespaces
-            map.put(entry[0].trim(), entry[1].trim());
+        streamOut = new DataOutputStream(socket.getOutputStream());
+        if (thread == null) {
+            //create a BidderThread
+            client = new BidderThread(this, socket);
+
+            //Wrap the Bidder in a Thread Object
+            thread = new Thread(this);
+            thread.start();
         }
-        System.out.println(map.get("Key1"));
+    }
+
+    public void stop() {
+        try {
+            if (console != null) console.close();
+            if (streamOut != null) streamOut.close();
+            if (socket != null) socket.close();
+        } catch (IOException ioe) {
+            System.out.println("Error closing ...");
+
+        }
+        client.close();
+        thread = null;
     }
 
 
-    public static void main(String[] args) {
-        Bidder bidder = new Bidder("Tom");
-        bidder.accessServer();
+    public static void main(String args[]) {
+        Bidder bidder = null;
+        if (args.length != 3)
+            System.out.println("Usage: java Bidder host port name");
+        else
+            bidder = new Bidder(args[0], Integer.parseInt(args[1]), args[2]);
     }
-
 }
