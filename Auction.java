@@ -174,7 +174,7 @@ public class Auction implements Runnable {
         for (int i = 0; i < clientCount; i++) {
             clients[i].send(itemDetails);
         }
-
+        
     }
 
     //Controls the running of the auction
@@ -230,7 +230,6 @@ public class Auction implements Runnable {
 
         //restart time for next item
         resetTimeRemaining();
-
         //run timer for next auction
         runTimerTask();
 
